@@ -1,7 +1,8 @@
 <?php
 
-require_once '../config/database.php';
-require_once '../models/User.php';
+require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../../models/User.php';
+require_once __DIR__ . '/../../models/Token.php';
 
 class UserResource
 {
@@ -15,9 +16,33 @@ class UserResource
         $this->user = new User($this->db);
     }
 
+    // 🔐 FUNCIÓN DE AUTENTICACIÓN (DENTRO DE LA CLASE)
+    private function checkAuth()
+    {
+        $headers = getallheaders();
+        $authHeader = $headers['Authorization'] ?? '';
+
+        if (!preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
+            http_response_code(401);
+            echo json_encode(["message" => "Token requerido"]);
+            exit;
+        }
+
+        $token = $matches[1];
+        $tokenModel = new Token();
+
+        if (!$tokenModel->validate($token)) {
+            http_response_code(401);
+            echo json_encode(["message" => "Token inválido o expirado"]);
+            exit;
+        }
+    }
+
     // GET /api/v1/users
     public function index()
     {
+        $this->checkAuth(); // 🔐 proteger
+
         header("Content-Type: application/json");
 
         $stmt = $this->user->read();
@@ -49,6 +74,8 @@ class UserResource
     // GET /api/v1/users/{id}
     public function show($id)
     {
+        $this->checkAuth();
+
         header("Content-Type: application/json");
 
         $this->user->id = $id;
@@ -72,6 +99,8 @@ class UserResource
     // POST /api/v1/users
     public function store()
     {
+        $this->checkAuth();
+
         header("Content-Type: application/json");
 
         $data = json_decode(file_get_contents("php://input"));
@@ -99,6 +128,8 @@ class UserResource
     // PUT /api/v1/users/{id}
     public function update($id)
     {
+        $this->checkAuth();
+
         header("Content-Type: application/json");
 
         $data = json_decode(file_get_contents("php://input"));
@@ -125,6 +156,8 @@ class UserResource
     // DELETE /api/v1/users/{id}
     public function destroy($id)
     {
+        $this->checkAuth();
+
         header("Content-Type: application/json");
 
         $this->user->id = $id;

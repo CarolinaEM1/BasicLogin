@@ -12,6 +12,9 @@ require_once '../resources/v1/AuthResource.php';
 $basePath = '/api/public';
 
 $router = new Router('v1', $basePath);
+
+$authResource = new AuthResource();
+$router->addRoute('POST', '/login', [$authResource, 'login']);
 $userResource = new UserResource();
 
 // rutas
