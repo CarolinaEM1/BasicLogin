@@ -4,33 +4,34 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
-require_once '../resources/v1/ProductResource.php';
 require_once '../core/Router.php';
 require_once '../resources/v1/UserResource.php';
+require_once '../resources/v1/ProductResource.php';
 require_once '../resources/v1/AuthResource.php';
 
 $basePath = '/api/public';
 
 $router = new Router('v1', $basePath);
 
+// 🔐 LOGIN
 $authResource = new AuthResource();
 $router->addRoute('POST', '/login', [$authResource, 'login']);
-$userResource = new UserResource();
 
-// rutas
+// 👤 USERS
+$userResource = new UserResource();
 $router->addRoute('GET', '/users', [$userResource, 'index']);
 $router->addRoute('GET', '/users/{id}', [$userResource, 'show']);
 $router->addRoute('POST', '/users', [$userResource, 'store']);
 $router->addRoute('PUT', '/users/{id}', [$userResource, 'update']);
 $router->addRoute('DELETE', '/users/{id}', [$userResource, 'destroy']);
 
-$router->dispatch();
-
+// 📦 PRODUCTOS
 $productResource = new ProductResource();
-
 $router->addRoute('GET', '/productos', [$productResource, 'index']);
 $router->addRoute('GET', '/productos/{id}', [$productResource, 'show']);
 $router->addRoute('POST', '/productos', [$productResource, 'store']);
 $router->addRoute('PUT', '/productos/{id}', [$productResource, 'update']);
 $router->addRoute('DELETE', '/productos/{id}', [$productResource, 'destroy']);
-?>
+
+// 🚀 SIEMPRE AL FINAL
+$router->dispatch();
